@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <style>
+         body{background: skyblue;font-family: Verdana, Geneva, Tahoma, sans-serif;color: rgb(14, 17, 15);padding: 30px}
+         h1{font-size: 48px;text-transform: uppercase;letter-spacing: 2px;text-align: center}
+         
+        </style>
+        <link rel="stylesheet" href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+        <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+        <script src='//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js'></script>
+    </head>
+       
+    <body>
+        <h1>File Explorer</h1>
+        <p id='path' value=''>C:\\Users</p>
+
+        <table id="dirview" class="display" style="width:50%">
+               
+        </table>
+    </body>
+    <script>
+       $(document).ready(function() {
+
+           
+           $.fn.dataTable.ext.errMode = 'none';
+           callupdate(document.getElementById("path"));
+                   
+        } );
+
+        function callupdate(element)
+        {
+                p=$(element).attr('value');
+                p=beautifyPath(p);
+                $('#path').text(p);
+                part_of_path=p.replace(/\\/g, "\\\\");
+                path='/list_dir?path='+part_of_path;
+                console.log(path);
+                updateTable(path);
+        }
+
+        function beautifyPath(path)
+        {
+            part_of_path=path.split('\\');
+            new_path='';
+            for(i=0;i<part_of_path.length;i++)
+            {
+                if(part_of_path[i]!='')
+                {
+                    new_path+=part_of_path[i]+'\\'
+                }
+            }
+            return new_path;
+        }
+
+        function updateTable(url)
+        {
+            fetch(url).then(response => {
+                return response.json();
+                }).then(data => {
+                    debugger
+                    table_data=[];
+                    if ($('#path').html()=="")
+                    {
+                        $('#path').text(data[0].currDir);
+                    }
+                    for (i=0;i<data.length;i++)
+                    {
+                        obj=data[i];
+                      if(obj.type==='file')
+                      {
+                        
+                            obj.name='<a href="/get_file?filepath='+obj.path+'" target="_blank">'+obj.name+'</a>'
+                            table_data.push([obj.name,obj.size]);
+                      }
+                      else
+                      {
+  
+                            obj.name='<a href=# value="'+obj.path+'" onclick="callupdate(this)">'+obj.name+'</a>';
+                            table_data.push([obj.name,obj.size]);
+                      }
+                    }
+
+                    if ( $.fn.DataTable.isDataTable( '#dirview' ) ) {
+                        $('#dirview').DataTable().destroy();
+                    }
+
+
+                    $('#dirview').DataTable({
+                        "paging":   false,
+                        "aoColumns": [
+                                { "sTitle": "Name" },
+                                { "sTitle": "size" },],
+                        data:table_data,
+                    });
+                
+                }).catch(err => {
+                    console.log(err);
+                });
+        }
+    
+    </script>
+</html>
