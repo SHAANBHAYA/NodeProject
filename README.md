@@ -1,6 +1,6 @@
 # NodeProject
 
-This is a simple web based file explorer made in node.js without any use of 3rd party node libraries. 
+This is a simple web based file explorer made in node.js without using any 3rd party node libraries. 
 
 # Setup and Installation 
 
